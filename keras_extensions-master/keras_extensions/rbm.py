@@ -29,9 +29,9 @@ class RBM(Layer):
     # keras.core.Layer part (modified from keras.core.Dense)
     # ------------------------------------------------------
 
-    def __init__(self, hidden_dim, init='glorot_uniform', 
-		activation='sigmoid', weights=None, 
-		W_regularizer=None, bx_regularizer=None, bh_regularizer=None, 
+    def __init__(self, hidden_dim, init='glorot_uniform',
+		activation='sigmoid', weights=None,
+		W_regularizer=None, bx_regularizer=None, bh_regularizer=None,
 		activity_regularizer=None,
                 W_constraint=None, bx_constraint=None, bh_constraint=None,
 		input_dim=None, nb_gibbs_steps=1, persistent=False, batch_size=1,
@@ -40,9 +40,9 @@ class RBM(Layer):
 		**kwargs):
 
 	self.p = dropout
-	if(0.0 < self.p < 1.0): 
-             self.uses_learning_phase = True 
-        self.supports_masking = True 
+	if(0.0 < self.p < 1.0):
+             self.uses_learning_phase = True
+        self.supports_masking = True
 
 	self.nb_gibbs_steps=nb_gibbs_steps
 
@@ -52,7 +52,7 @@ class RBM(Layer):
 	self.hidden_dim = hidden_dim
 	self.input_dim = input_dim
 	self.batch_size = batch_size
-	
+
 	self.scaling_h_given_x = scaling_h_given_x
 	self.scaling_x_given_h = scaling_x_given_h
 
@@ -64,10 +64,10 @@ class RBM(Layer):
         self.W_constraint = constraints.get(W_constraint)
         self.bx_constraint = constraints.get(bx_constraint)
 	self.bh_constraint = constraints.get(bh_constraint)
-	
+
 	self.initial_weights = weights
 	self.input_spec = [InputSpec(ndim=2)]
-	
+
 	if self.input_dim:
             kwargs['input_shape'] = (self.input_dim,)
         super(RBM, self).__init__(**kwargs)
@@ -80,13 +80,13 @@ class RBM(Layer):
 			   name='{}_bh'.format(self.name))
 
 	self.trainable_weights = [self.W, self.bx, self.bh]
-	
+
 	self.is_persistent = persistent
 	if(self.is_persistent):
 		self.persistent_chain = theano.shared(np.zeros((self.batch_size, self.input_dim), dtype=theano.config.floatX), borrow=True)
 
-    def _get_noise_shape(self, x): 
-        return None 
+    def _get_noise_shape(self, x):
+        return None
 
 
     def build(self, input_shape):
@@ -116,7 +116,7 @@ class RBM(Layer):
         self.constraints = {}
         if self.W_constraint:
             self.constraints[self.W] = self.W_constraint
-        
+
 	if self.bx_constraint:
             self.constraints[self.bx] = self.bx_constraint
 
@@ -131,7 +131,7 @@ class RBM(Layer):
     def call(self, x, mask=None):
 	y = K.dot(self.W, x) + self.bx
 	output = self.activation(y)
-	
+
 	return output
 
     def get_output_shape_for(self, input_shape):
@@ -162,8 +162,8 @@ class RBM(Layer):
         """
         Compute free energy for Bernoulli RBM, given visible units.
 
-        The marginal probability p(x) = sum_h 1/Z exp(-E(x, h)) can be re-arranged to the form 
-        p(x) = 1/Z exp(-F(x)), where the free energy F(x) = -sum_j=1^H log(1 + exp(x^T W[:,j] + bh_j)) - bx^T x, 
+        The marginal probability p(x) = sum_h 1/Z exp(-E(x, h)) can be re-arranged to the form
+        p(x) = 1/Z exp(-F(x)), where the free energy F(x) = -sum_j=1^H log(1 + exp(x^T W[:,j] + bh_j)) - bx^T x,
         in case of the Bernoulli RBM energy function.
         """
         wx_b = K.dot(x, self.W) + self.bh
@@ -175,7 +175,7 @@ class RBM(Layer):
         """
         Draw sample from p(h|x).
 
-        For Bernoulli RBM the conditional probability distribution can be derived to be 
+        For Bernoulli RBM the conditional probability distribution can be derived to be
            p(h_j=1|x) = sigmoid(x^T W[:,j] + bh_j).
         """
         h_pre = K.dot(x, self.W) + self.bh          # pre-sigmoid (used in cross-entropy error calculation for better numerical stability)
@@ -198,16 +198,16 @@ class RBM(Layer):
         """
         Draw sample from p(x|h).
 
-        For Bernoulli RBM the conditional probability distribution can be derived to be 
+        For Bernoulli RBM the conditional probability distribution can be derived to be
            p(x_i=1|h) = sigmoid(W[i,:] h + bx_i).
         """
         # pre-sigmoid (used in cross-entropy error calculation for better numerical stability)
-        x_pre = K.dot(h, self.W.T) + self.bx        
-        
+        x_pre = K.dot(h, self.W.T) + self.bx
+
         # mean of Bernoulli distribution ('p', prob. of variable taking value 1), sometimes called mean-field value
-        x_sigm = K.sigmoid(self.scaling_x_given_h  * x_pre)             
+        x_sigm = K.sigmoid(self.scaling_x_given_h  * x_pre)
         #x_sigm = self.activation(self.scaling_x_given_h * x_pre)
-	
+
 	x_samp = random_binomial(shape=x_sigm.shape, n=1, p=x_sigm)
         # random sample
         #   \hat{x} = 1,      if p(x=1|h) > uniform(0, 1)
@@ -229,7 +229,7 @@ class RBM(Layer):
 
     def mcmc_chain(self, x, nb_gibbs_steps):
         """
-        Perform Markov Chain Monte Carlo, run k steps of Gibbs sampling, 
+        Perform Markov Chain Monte Carlo, run k steps of Gibbs sampling,
         starting from visible data, return point estimate at end of chain.
 
            x0 (data) -> h1 -> x1 -> ... -> xk (reconstruction, negative sample)
@@ -239,10 +239,10 @@ class RBM(Layer):
         for i in xrange(nb_gibbs_steps):
             xi, xi_pre, xi_sigm = self.gibbs_xhx(xi)
         x_rec, x_rec_pre, x_rec_sigm = xi, xi_pre, xi_sigm
-        
+
         x_rec = theano.gradient.disconnected_grad(x_rec)    # avoid back-propagating gradient through the Gibbs sampling
                                                             # this is similar to T.grad(.., consider_constant=[chain_end])
-                                                            # however, as grad() is called in keras.optimizers.Optimizer, 
+                                                            # however, as grad() is called in keras.optimizers.Optimizer,
                                                             # we do it here instead to avoid having to change Keras' code
 
         return x_rec, x_rec_pre, x_rec_sigm
@@ -267,7 +267,7 @@ class RBM(Layer):
             return cd, x_rec
 
 	y, x_rec = loss(chain_start, x)
-	
+
 	if(self.is_persistent):
 		self.updates = [(self.persistent_chain, x_rec)]
 
@@ -286,18 +286,18 @@ class RBM(Layer):
         def loss(x):
             _, pre, _ = self.mcmc_chain(x, self.nb_gibbs_steps)
             # NOTE:
-            #   when computing log(sigmoid(x)) and log(1 - sigmoid(x)) of cross-entropy, 
+            #   when computing log(sigmoid(x)) and log(1 - sigmoid(x)) of cross-entropy,
             #   if x is very big negative, sigmoid(x) will be 0 and log(0) will be nan or -inf
             #   if x is very big positive, sigmoid(x) will be 1 and log(1-0) will be nan or -inf
-            #   Theano automatically rewrites this kind of expression using log(sigmoid(x)) = -softplus(-x), which 
+            #   Theano automatically rewrites this kind of expression using log(sigmoid(x)) = -softplus(-x), which
             #   is more stable numerically
-            #   however, as the sigmoid() function used in the reconstruction is inside a scan() operation, Theano 
-            #   doesn't 'see' it and is not able to perform the change; as a work-around we use pre-sigmoid value 
+            #   however, as the sigmoid() function used in the reconstruction is inside a scan() operation, Theano
+            #   doesn't 'see' it and is not able to perform the change; as a work-around we use pre-sigmoid value
             #   generated inside the scan() and apply the sigmoid here
             #
             # NOTE:
-            #   not sure how important this is; in most cases seems to work fine using just T.nnet.binary_crossentropy() 
-            #   for instance; keras.objectives.binary_crossentropy() simply clips the value entering the log(); and 
+            #   not sure how important this is; in most cases seems to work fine using just T.nnet.binary_crossentropy()
+            #   for instance; keras.objectives.binary_crossentropy() simply clips the value entering the log(); and
             #   this is only used for monitoring, not calculating gradient
             cross_entropy_loss = -T.mean(T.sum(x*T.log(T.nnet.sigmoid(pre)) + (1 - x)*T.log(1 - T.nnet.sigmoid(pre)), axis=1))
 	    #cross_entropy_loss = -T.mean(T.sum(x*T.log(self.activation(pre)) + (1 - x)*T.log(1 - self.activation(pre)), axis=1))
@@ -309,7 +309,7 @@ class RBM(Layer):
         """
         Computes the free energy gap between train and test set, F(x_test) - F(x_train).
 
-        In order to avoid overfitting, we cannot directly monitor if the probability of held out data is 
+        In order to avoid overfitting, we cannot directly monitor if the probability of held out data is
         starting to decrease, due to the partition function.
         We can however compute the ratio p(x_train)/p(x_test), because here the partition functions cancel out.
         This ratio should be close to 1, if it is > 1, the model may be overfitting.
@@ -318,10 +318,10 @@ class RBM(Layer):
            r = p(x_train)/p(x_test) = exp(-F(x_train) + F(x_test)).
         Alternatively, we compute the free energy gap,
            gap = F(x_test) - F(x_train),
-        where F(x) indicates the mean free energy of test data and a representative subset of 
+        where F(x) indicates the mean free energy of test data and a representative subset of
         training data respectively.
         The gap should around 0 normally, but when it starts to grow, the model may be overfitting.
-        However, even when the gap is growing, the probability of the training data may be growing even faster, 
+        However, even when the gap is growing, the probability of the training data may be growing even faster,
         so the probability of the test data may still be improving.
 
         See: Hinton, "A Practical Guide to Training Restricted Boltzmann Machines", UTML TR 2010-003, 2010, section 6.
@@ -364,26 +364,26 @@ class GBRBM(RBM):
     """
     Gaussian-Bernoulli Restricted Boltzmann Machine (GB-RBM).
 
-    This GB-RBM does not learn variances of Gaussian units, but instead fixes them to 1 and 
-    uses noise-free reconstructions. Input data should be pre-processed to have zero mean 
+    This GB-RBM does not learn variances of Gaussian units, but instead fixes them to 1 and
+    uses noise-free reconstructions. Input data should be pre-processed to have zero mean
     and unit variance along the feature dimensions.
 
     See: Hinton, "A Practical Guide to Training Restricted Boltzmann Machines", UTML TR 2010-003, 2010, section 13.2.
     """
 
-    def __init__(self, hidden_dim, init='glorot_uniform', 
-		activation='sigmoid', weights=None, 
-		W_regularizer=None, bx_regularizer=None, bh_regularizer=None, 
+    def __init__(self, hidden_dim, init='glorot_uniform',
+		activation='sigmoid', weights=None,
+		W_regularizer=None, bx_regularizer=None, bh_regularizer=None,
 		activity_regularizer=None,
                 W_constraint=None, bx_constraint=None, bh_constraint=None,
 		input_dim=None, nb_gibbs_steps=1, persistent=True, batch_size=1,		scaling_h_given_x=1.0, scaling_x_given_h=1.0,
 		dropout=0.0,
 		**kwargs):
-	
+
 	self.nb_gibbs_steps=nb_gibbs_steps
-        super(GBRBM, self).__init__(hidden_dim=hidden_dim, init=init, 
+        super(GBRBM, self).__init__(hidden_dim=hidden_dim, init=init,
 				    activation=activation, weights=weights,
-				    input_dim=input_dim, nb_gibbs_steps=nb_gibbs_steps, 
+				    input_dim=input_dim, nb_gibbs_steps=nb_gibbs_steps,
 				    scaling_h_given_x=scaling_h_given_x,
 				    scaling_x_given_h=scaling_x_given_h,
 				    persistent=persistent, batch_size=batch_size,
@@ -401,24 +401,24 @@ class GBRBM(RBM):
         vbias_term = 0.5*K.sum((x - self.bx)**2, axis=1)
         hidden_term = K.sum(K.log(1 + K.exp(wx_b)), axis=1)
         return -hidden_term + vbias_term
-    
+
     # sample_h_given_x() same as BB-RBM
     def sample_x_given_h(self, h):
         """
         Draw sample from p(x|h).
 
-        For Gaussian-Bernoulli RBM the conditional probability distribution can be derived to be 
+        For Gaussian-Bernoulli RBM the conditional probability distribution can be derived to be
            p(x_i|h) = norm(x_i; sigma_i W[i,:] h + bx_i, sigma_i^2).
         """
         x_mean = K.dot(h, self.W.T) + self.bx
         x_samp = self.scaling_x_given_h  * x_mean
-                # variances of the Gaussian units are not learned, 
+                # variances of the Gaussian units are not learned,
                 # instead we fix them to 1 in the energy function
-                # here, instead of sampling from the Gaussian distributions, 
+                # here, instead of sampling from the Gaussian distributions,
                 # we simply take their means; we'll end up with a noise-free reconstruction
         # here last two returns are dummy variables related to Bernoulli RBM base class (returning e.g. x_samp, None, None doesn't work)
         return x_samp, x_samp, x_samp
-   
+
     # gibbs_xhx() same as BB-RBM
     # mcmc_chain() same as BB-RBM
 
@@ -467,20 +467,20 @@ class GBRBM(RBM):
 
 
 class GNRRBM(GBRBM):
-    def __init__(self, hidden_dim, init='glorot_uniform', 
-		activation='sigmoid', weights=None, 
-		W_regularizer=None, bx_regularizer=None, bh_regularizer=None, 
+    def __init__(self, hidden_dim, init='glorot_uniform',
+		activation='sigmoid', weights=None,
+		W_regularizer=None, bx_regularizer=None, bh_regularizer=None,
 		activity_regularizer=None,
                 W_constraint=None, bx_constraint=None, bh_constraint=None,
-		input_dim=None, nb_gibbs_steps=1, persistent=True, batch_size=1,		
+		input_dim=None, nb_gibbs_steps=1, persistent=True, batch_size=1,
 		scaling_h_given_x=1.0, scaling_x_given_h=1.0,
 		dropout=0.0,
 		**kwargs):
-	
+
 	self.nb_gibbs_steps=nb_gibbs_steps
-        super(GNRRBM, self).__init__(hidden_dim=hidden_dim, init=init, 
+        super(GNRRBM, self).__init__(hidden_dim=hidden_dim, init=init,
 				    activation=activation, weights=weights,
-				    input_dim=input_dim, nb_gibbs_steps=1, 
+				    input_dim=input_dim, nb_gibbs_steps=1,
 				    scaling_h_given_x=scaling_h_given_x,
 				    scaling_x_given_h=scaling_x_given_h,
 				    persistent=False, batch_size=batch_size,
@@ -492,7 +492,7 @@ class GNRRBM(GBRBM):
     # -------------
     # RBM internals
     # -------------
-    
+
     def sample_h_given_x(self, x):
 
         h_pre = K.dot(x, self.W) + self.bh
@@ -521,4 +521,3 @@ def get_h_given_x_layer(self, as_initial_layer=False):
         else:
             layer = Dense(output_dim=self.hidden_dim, activation="relu", weights=[self.W.get_value(), self.bh.get_value()])
         return layer
-
