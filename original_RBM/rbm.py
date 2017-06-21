@@ -194,7 +194,7 @@ class RBM:
 
 if __name__ == '__main__':
   nframes = 10000
-  r = RBM(num_visible = 4, num_hidden = 4)
+  r = RBM(num_visible = 4, num_hidden = 2)
   '''
   #load data and divide into sublist
   load_data = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\original_RBM\clustering.csv', delimiter=',')[1:5001,-3]
@@ -208,7 +208,7 @@ if __name__ == '__main__':
           dataset = buffer2
       else:
           dataset = np.concatenate((dataset,buffer2))
-  
+
   #random range -2 to 2 and conver to 0 and 1
   random_num = np.random.normal(loc=np.zeros(input_dim), scale=np.ones(input_dim), size=(nframes, input_dim))
   dataset = np.array([[]])
@@ -226,36 +226,48 @@ if __name__ == '__main__':
           dataset = np.concatenate((dataset,buffer2))
   '''
   #check the data range and convert to sublist
-  load_data = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\original_RBM\clustering.csv', delimiter=',')[1:5001,-3]
+  load_data = genfromtxt('clustering.csv', delimiter=',')[1:5001,-3]
   dataset = np.array([[]])
   for i in range(0,len(load_data)):
+          buffer = np.array([])
+          if load_data[i] < np.percentile(load_data,25):
+              buffer = [1,0,0,0]
+          elif load_data[i] >= np.percentile(load_data,25) and load_data[i] < np.percentile(load_data,50):
+              buffer = [0,1,0,0]
+          elif load_data[i] >= np.percentile(load_data,50) and load_data[i] < np.percentile(load_data,75):
+              buffer = [0,0,1,0]
+          elif load_data[i] >= np.percentile(load_data,75) and load_data[i] <= np.percentile(load_data,100):
+              buffer = [0,0,0,1]
+          buffer2 = np.array([buffer])
+          if i == 0:
+              dataset = buffer2
+          else:
+              dataset = np.concatenate((dataset,buffer2))
+          
+  dataset2 = np.array([[]])
+  for i in range(0,dataset.shape[0]-1):
       buffer = np.array([])
-      if load_data[i] < np.percentile(load_data,25):
-          buffer = [1,0,0,0]
-      elif load_data[i] >= np.percentile(load_data,25) and load_data[i] < np.percentile(load_data,50):
-          buffer = [0,1,0,0]
-      elif load_data[i] >= np.percentile(load_data,50) and load_data[i] < np.percentile(load_data,75):
-          buffer = [0,0,1,0]
-      elif load_data[i] >= np.percentile(load_data,75) and load_data[i] <= np.percentile(load_data,100):
-          buffer = [0,0,0,1]
+      for j in range(0,4):
+          buffer = np.append(buffer,(dataset[i][j] or dataset[i+1][j]))
       buffer2 = np.array([buffer])
       if i == 0:
-          dataset = buffer2
+          dataset2 = buffer2
       else:
-          dataset = np.concatenate((dataset,buffer2))
-            
-      
+          dataset2 = np.concatenate((dataset2,buffer2))
+
+
   #training_data = np.array([[1,1,1,0,0,0],[1,0,1,0,0,0],[1,1,1,0,0,0],[0,0,1,1,1,0], [0,0,1,1,0,0],[0,0,1,1,1,0]])
-  training_data = dataset[0:4000,:]
-  r.train(training_data, max_epochs = 5000)
+  training_data = dataset2[0:4000,:]
+  r.train(training_data, max_epochs = 100000)
   print(r.weights)
-  user = dataset[4001:5000,:]
+  #user = np.array([[1,0,0,0],[0,0,1,1],[1,0,0,1],[0,1,2,3]])
+  user = dataset2[4001:,:]
   print("Forward as hidden state")
   print(r.run_visible(user))
-  
+
   with open("datasetoutput.csv", "wb") as f:
         writer = csv.writer(f)
-        writer.writerows(dataset[4001:5000,:])
+        writer.writerows(user)
   with open("resultoutput.csv", "wb") as f:
         writer = csv.writer(f)
         writer.writerows(r.run_visible(user)[:,:])
