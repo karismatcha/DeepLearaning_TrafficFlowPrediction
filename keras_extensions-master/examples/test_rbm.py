@@ -19,7 +19,7 @@ from keras_extensions.initializations import glorot_uniform_sigm
 
 # configuration
 input_dim = 4
-hidden_dim = 2
+hidden_dim = 3
 batch_size = 10
 nb_epoch = 15
 nb_gibbs_steps = 10
@@ -98,7 +98,7 @@ def main():
     print('Creating training model...')
     rbm = GBRBM(hidden_dim, input_dim=input_dim,
 		init=glorot_uniform_sigm,
-		activation='relu',
+		activation='sigmoid',
 		nb_gibbs_steps=nb_gibbs_steps,
 		persistent=True,
 		batch_size=batch_size,

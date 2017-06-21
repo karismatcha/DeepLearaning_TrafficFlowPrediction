@@ -194,7 +194,7 @@ class RBM:
 
 if __name__ == '__main__':
   nframes = 10000
-  r = RBM(num_visible = 4, num_hidden = 2)
+  r = RBM(num_visible = 4, num_hidden = 4)
   '''
   #load data and divide into sublist
   load_data = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\original_RBM\clustering.csv', delimiter=',')[1:5001,-3]
@@ -264,11 +264,11 @@ if __name__ == '__main__':
 
   #training_data = np.array([[1,1,1,0,0,0],[1,0,1,0,0,0],[1,1,1,0,0,0],[0,0,1,1,1,0], [0,0,1,1,0,0],[0,0,1,1,1,0]])
 
-  training_data = dataset2[0:4000,:]
-  r.train(training_data, max_epochs = 100000)
+  training_data = dataset
+  r.train(training_data, max_epochs = 10000)
   print(r.weights)
   #user = np.array([[1,0,0,0],[0,0,1,1],[1,0,0,1],[0,1,2,3]])
-  user = dataset2[4001:,:]
+  user = dataset
   print("Forward as hidden state")
   print(r.run_visible(user))
 
