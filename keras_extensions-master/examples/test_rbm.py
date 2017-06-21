@@ -18,8 +18,8 @@ from keras_extensions.initializations import glorot_uniform_sigm
 
 
 # configuration
-input_dim = 100
-hidden_dim = 200
+input_dim = 4
+hidden_dim = 2
 batch_size = 10
 nb_epoch = 15
 nb_gibbs_steps = 10
@@ -34,7 +34,8 @@ def main():
 	#Mean = 0 with input_dim size, sd = 0 with input_dim size, size = nframes * input_dim
 	#Get dataset which has value near 0 (bcz sd = 1) size 10000 * 100
 	#[[],[],...]
-    #dataset = np.random.normal(loc=np.zeros(input_dim), scale=np.ones(input_dim), size=(nframes, input_dim))
+   #dataset = np.random.normal(loc=np.zeros(input_dim), scale=np.ones(input_dim), size=(nframes, input_dim))
+    '''
     load_data = genfromtxt('C:\Users\oob13\Desktop\Internship\keras_extensions-master\examples\clustering.csv', delimiter=',')[1:5001,-3]
     dataset = np.array([[]])
     for i in range(0,len(load_data),100):
@@ -46,10 +47,46 @@ def main():
             dataset = buffer2
         else:
             dataset = np.concatenate((dataset,buffer2))
-
+    '''
+    
+    #transform dataset
+    load_data = genfromtxt('clustering.csv', delimiter=',')[1:5001,-3]
+    dataset = np.array([[]])
+    for i in range(0,len(load_data)):
+        buffer = np.array([])
+        if load_data[i] < np.percentile(load_data,25):
+            buffer = [1,0,0,0]
+        elif load_data[i] >= np.percentile(load_data,25) and load_data[i] < np.percentile(load_data,50):
+            buffer = [0,1,0,0]
+        elif load_data[i] >= np.percentile(load_data,50) and load_data[i] < np.percentile(load_data,75):
+            buffer = [0,0,1,0]
+        elif load_data[i] >= np.percentile(load_data,75) and load_data[i] <= np.percentile(load_data,100):
+            buffer = [0,0,0,1]
+        buffer2 = np.array([buffer])
+        if i == 0:
+            dataset = buffer2
+        else:
+            dataset = np.concatenate((dataset,buffer2))
+          
+    '''
+    #relation by or expression
+    dataset2 = np.array([[]])
+    for i in range(0,dataset.shape[0]-1):
+      buffer = np.array([])
+      for j in range(0,4):
+          buffer = np.append(buffer,(dataset[i][j] or dataset[i+1][j]))
+      buffer2 = np.array([buffer])
+      if i == 0:
+          dataset2 = buffer2
+      else:
+          dataset2 = np.concatenate((dataset2,buffer2))
+    '''
+    
+    
+    
     # split into train and test portion
-    #ntest   = 1000
-    ntest   = 10
+    ntest   = 999
+    #ntest   = 10
     X_train = dataset[:-ntest :]     # all but last 1000 samples for training
     X_test  = dataset[-ntest:, :]    # last 1000 samples for testing
 
@@ -90,7 +127,7 @@ def main():
 
     # do training, training occur here
     print('Training...')
-    tm = train_model.fit(X_train, X_train, batch_size, nb_epoch, verbose=1, shuffle=False)
+    train_model.fit(X_train, X_train, batch_size, nb_epoch, verbose=1, shuffle=False)
 	#Epoch 1/15 5000/9000 [========>..............]
 
 
@@ -118,6 +155,8 @@ def main():
     print("Dataset")
     print(dataset)
 
+    for i in range(0,h.shape[0]):
+        h[i] = [round(elem) for elem in h[i]]
     print("result")
     print(h)
 

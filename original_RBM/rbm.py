@@ -208,8 +208,13 @@ if __name__ == '__main__':
           dataset = buffer2
       else:
           dataset = np.concatenate((dataset,buffer2))
+<<<<<<< Updated upstream
 
   #random range -2 to 2 and conver to 0 and 1
+=======
+  
+  #random range -2 to 2 and convert to 0 and 1
+>>>>>>> Stashed changes
   random_num = np.random.normal(loc=np.zeros(input_dim), scale=np.ones(input_dim), size=(nframes, input_dim))
   dataset = np.array([[]])
   for i in range(0,nframes):
@@ -226,6 +231,7 @@ if __name__ == '__main__':
           dataset = np.concatenate((dataset,buffer2))
   '''
   #check the data range and convert to sublist
+
   load_data = genfromtxt('clustering.csv', delimiter=',')[1:5001,-3]
   dataset = np.array([[]])
   for i in range(0,len(load_data)):
@@ -257,6 +263,7 @@ if __name__ == '__main__':
 
 
   #training_data = np.array([[1,1,1,0,0,0],[1,0,1,0,0,0],[1,1,1,0,0,0],[0,0,1,1,1,0], [0,0,1,1,0,0],[0,0,1,1,1,0]])
+
   training_data = dataset2[0:4000,:]
   r.train(training_data, max_epochs = 100000)
   print(r.weights)
