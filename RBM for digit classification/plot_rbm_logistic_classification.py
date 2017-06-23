@@ -40,8 +40,33 @@ from sklearn import linear_model, datasets, metrics
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import BernoulliRBM
 from sklearn.pipeline import Pipeline
+from numpy import genfromtxt
+###############################################################################
+#Traffic part
 
+load_data = genfromtxt('C:\Users\user\Desktop\DeepLearaning_TrafficFlowPrediction\RBM for digit classification\clustering.csv', delimiter=',')[1:5001,-3]
+#chage 1D array to 2D array because fitting data require 2D array
 
+#Create X
+input_dim = 50 #Number of dimension affect to accuracy
+assert load_data.shape[0]%input_dim == 0 , "incorrect input dimension"
+dataset = np.array([[]])
+for i in range(0,len(load_data),input_dim):
+    buffer = np.array([])
+    for j in range(0,input_dim):
+        buffer = np.append(buffer,round(load_data[i+j]))
+    buffer2 = np.array([buffer])
+    if i == 0:
+        dataset = buffer2
+    else:
+        dataset = np.concatenate((dataset,buffer2))
+X = (np.asarray(dataset, 'float32'))[:-1]
+
+buffer = np.array([])
+for i in range(input_dim,load_data.shape[0],input_dim):
+    buffer = np.append(buffer,round(load_data[i]))
+Y = buffer
+'''
 ###############################################################################
 # Setting up
 
@@ -79,8 +104,11 @@ def nudge_dataset(X, Y):
 digits = datasets.load_digits()
 X = np.asarray(digits.data, 'float32')
 X, Y = nudge_dataset(X, digits.target)
+buff = X
+'''
 X = (X - np.min(X, 0)) / (np.max(X, 0) + 0.0001)  # 0-1 scaling
 
+#Divide X,Y into train and test data
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y,
                                                     test_size=0.2,
                                                     random_state=0)
@@ -101,7 +129,8 @@ rbm.learning_rate = 0.06
 rbm.n_iter = 20
 # More components tend to give better prediction performance, but larger
 # fitting time
-rbm.n_components = 100
+# n_component = number of binary hidden unit
+rbm.n_components = input_dim
 logistic.C = 6000.0
 
 # Training RBM-Logistic Pipeline
@@ -115,6 +144,21 @@ logistic_classifier.fit(X_train, Y_train)
 # Evaluation
 
 print()
+
+#Evaluation part
+#set speed difference threshold
+thershold = 3
+predict = classifier.predict(X_test)
+check_count = 0
+for i in range(0,predict.shape[0]):
+    check = Y_test[i] - predict[i] > thershold or Y_test[i] - predict[i] < -thershold
+    if check == True:
+        check_count+=1
+        print("more: pred {0} truth{1}" .format(predict[i],Y_test[i]))
+accuracy = (float(predict.shape[0]-check_count)/predict.shape[0])*100
+print("Accuracy = {0}%".format(accuracy))
+
+'''
 print("Logistic regression using RBM features:\n%s\n" % (
     metrics.classification_report(
         Y_test,
@@ -124,7 +168,8 @@ print("Logistic regression using raw pixel features:\n%s\n" % (
     metrics.classification_report(
         Y_test,
         logistic_classifier.predict(X_test))))
-
+'''
+'''
 ###############################################################################
 # Plotting
 
@@ -139,3 +184,4 @@ plt.suptitle('100 components extracted by RBM', fontsize=16)
 plt.subplots_adjust(0.08, 0.02, 0.92, 0.85, 0.08, 0.23)
 
 plt.show()
+'''
