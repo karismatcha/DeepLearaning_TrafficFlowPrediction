@@ -34,7 +34,6 @@ print(__doc__)
 
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 
 from scipy.ndimage import convolve
 from sklearn import linear_model, datasets, metrics
@@ -45,37 +44,17 @@ from numpy import genfromtxt
 ###############################################################################
 #Traffic part
 
-#Filter data and time to just 6.00 am to 9.00 am
-def importdict(filename):#creates a function to read the csv
-    #create data frame from csv with pandas module
-    df=pd.read_csv(filename+'.csv', names=['systemtime', 'Var1', 'var2'],sep=';',parse_dates=[0]) #or:, infer_datetime_format=True)
-    fileDATES=df.T.to_dict().values()#export the data frame to a python dictionary
-    return fileDATES #return the dictionary to work with it outside the function
-fileDATES = importdict('clustering')
-timebuffer = []
-for i in range(1,len(fileDATES)):
-    timebuffer.append((fileDATES[i]['systemtime'].split(","))[2]) #append only time into list #Already get list of time
-
-#load speed data
 load_data = genfromtxt('C:\Users\user\Desktop\DeepLearaning_TrafficFlowPrediction\RBM for digit classification\clustering.csv', delimiter=',')[1:5185,-3]
-#filter data in time range 6.00am to 9.00am
-speed = []
-for i in range(0,len(timebuffer)):
-    if timebuffer[i] == '6:00':
-        while timebuffer[i] != '9:05':
-            speed.append(load_data[i])
-            i+=1
-speed = np.array(speed)
-
 #chage 1D array to 2D array because fitting data require 2D array
+
 #Create X
 input_dim = 1 #Number of dimension affect to accuracy
-assert speed.shape[0]%input_dim == 0 , "incorrect input dimension"
+assert load_data.shape[0]%input_dim == 0 , "incorrect input dimension"
 dataset = np.array([[]])
-for i in range(0,len(speed),input_dim):
+for i in range(0,len(load_data),input_dim):
     buffer = np.array([])
     for j in range(0,input_dim):
-        buffer = np.append(buffer,round(speed[i+j]))
+        buffer = np.append(buffer,(load_data[i+j]))
     buffer2 = np.array([buffer])
     if i == 0:
         dataset = buffer2
@@ -84,10 +63,49 @@ for i in range(0,len(speed),input_dim):
 X = (np.asarray(dataset, 'float32'))[:-1]
 
 buffer = np.array([])
-for i in range(input_dim,speed.shape[0],input_dim):
-    buffer = np.append(buffer,round(speed[i]))
+for i in range(input_dim,load_data.shape[0],input_dim):
+    buffer = np.append(buffer,round(load_data[i]))
 Y = buffer
+'''
+###############################################################################
+# Setting up
 
+def nudge_dataset(X, Y):
+    """
+    This produces a dataset 5 times bigger than the original one,
+    by moving the 8x8 images in X around by 1px to left, right, down, up
+    """
+    direction_vectors = [
+        [[0, 1, 0],
+         [0, 0, 0],
+         [0, 0, 0]],
+
+        [[0, 0, 0],
+         [1, 0, 0],
+         [0, 0, 0]],
+
+        [[0, 0, 0],
+         [0, 0, 1],
+         [0, 0, 0]],
+
+        [[0, 0, 0],
+         [0, 0, 0],
+         [0, 1, 0]]]
+
+    shift = lambda x, w: convolve(x.reshape((8, 8)), mode='constant',
+                                  weights=w).ravel()
+    X = np.concatenate([X] +
+                       [np.apply_along_axis(shift, 1, X, vector)
+                        for vector in direction_vectors])
+    Y = np.concatenate([Y for _ in range(5)], axis=0)
+    return X, Y
+
+# Load Data
+digits = datasets.load_digits()
+X = np.asarray(digits.data, 'float32')
+X, Y = nudge_dataset(X, digits.target)
+buff = X
+'''
 X = (X - np.min(X, 0)) / (np.max(X, 0) + 0.0001)  # 0-1 scaling
 
 #Divide X,Y into train and test data
@@ -136,20 +154,34 @@ for i in range(0,predict.shape[0]):
     check = abs(Y_test[i] - predict[i]) > abs(threshold[i])
     if check == True:
         check_count+=1
-        #print("error predict: pred {0} truth{1}" .format(predict[i],Y_test[i]))
+        print("error predict: pred {0} truth{1}" .format(predict[i],Y_test[i]))
 accuracy = (float(predict.shape[0]-check_count)/predict.shape[0])*100
-print("RBM Accuracy = %.2f %%" % accuracy)
+print("Accuracy = %.2f %%" % accuracy)
 
+'''
+print("Logistic regression using RBM features:\n%s\n" % (
+    metrics.classification_report(
+        Y_test,
+        classifier.predict(X_test))))
 
+print("Logistic regression using raw pixel features:\n%s\n" % (
+    metrics.classification_report(
+        Y_test,
+        logistic_classifier.predict(X_test))))
+'''
+'''
+###############################################################################
+# Plotting
 
-logistic = logistic_classifier.predict(X_test)
-check_count = 0
-for i in range(0,logistic.shape[0]):
-    check = abs(Y_test[i] - logistic[i]) > abs(threshold[i])
-    if check == True:
-        check_count+=1
-        #print("error predict: pred {0} truth{1}" .format(predict[i],Y_test[i]))
-accuracy = (float(logistic.shape[0]-check_count)/logistic.shape[0])*100
-print("Logistic Accuracy = %.2f %%" % accuracy)
+plt.figure(figsize=(4.2, 4))
+for i, comp in enumerate(rbm.components_):
+    plt.subplot(10, 10, i + 1)
+    plt.imshow(comp.reshape((8, 8)), cmap=plt.cm.gray_r,
+               interpolation='nearest')
+    plt.xticks(())
+    plt.yticks(())
+plt.suptitle('100 components extracted by RBM', fontsize=16)
+plt.subplots_adjust(0.08, 0.02, 0.92, 0.85, 0.08, 0.23)
 
-
+plt.show()
+'''
