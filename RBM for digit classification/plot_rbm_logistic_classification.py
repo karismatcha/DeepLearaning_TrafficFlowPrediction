@@ -136,7 +136,7 @@ for i in range(0,predict.shape[0]):
     check = abs(Y_test[i] - predict[i]) > abs(threshold[i])
     if check == True:
         check_count+=1
-        #print("error predict: pred {0} truth{1}" .format(predict[i],Y_test[i]))
+        print("error predict: pred {0} truth {1}" .format(predict[i],Y_test[i]))
 accuracy = (float(predict.shape[0]-check_count)/predict.shape[0])*100
 print("RBM Accuracy = %.2f %%" % accuracy)
 
@@ -148,7 +148,7 @@ for i in range(0,logistic.shape[0]):
     check = abs(Y_test[i] - logistic[i]) > abs(threshold[i])
     if check == True:
         check_count+=1
-        #print("error predict: pred {0} truth{1}" .format(predict[i],Y_test[i]))
+        #print("error predict: pred {0} truth {1}" .format(predict[i],Y_test[i]))
 accuracy = (float(logistic.shape[0]-check_count)/logistic.shape[0])*100
 print("Logistic Accuracy = %.2f %%" % accuracy)
 
