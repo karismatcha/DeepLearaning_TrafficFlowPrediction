@@ -57,7 +57,7 @@ for i in range(1,len(fileDATES)):
     timebuffer.append((fileDATES[i]['systemtime'].split(","))[2]) #append only time into list #Already get list of time
 
 #load speed data
-load_data = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\RBM for digit classification\clustering.csv', delimiter=',')[1:5185,-3]
+load_data = genfromtxt('.\\clustering.csv', delimiter=',')[1:5185,-3]
 #filter data in time range 6.00am to 9.00am
 speed = []
 for i in range(0,len(timebuffer)):
@@ -130,7 +130,7 @@ print()
 
 #Evaluation part
 #set speed difference threshold
-threshold = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\RBM for digit classification\clustering.csv', delimiter=',')[1:,-5]
+threshold = genfromtxt('.\\clustering.csv', delimiter=',')[1:,-5]
 predict = classifier.predict(X_test)
 check_count = 0
 for i in range(0,predict.shape[0]):

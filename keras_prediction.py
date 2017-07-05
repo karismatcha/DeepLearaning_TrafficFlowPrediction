@@ -40,7 +40,7 @@ def main():
     timebuffer = []
     for i in range(1,len(fileDATES)):
         timebuffer.append((fileDATES[i]['systemtime'].split(","))[2]) #append only time into list #A
-    load_data = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\keras_extensions-master\examples\clustering.csv', delimiter=',')[1:5185,-3]
+    load_data = genfromtxt('.\\clustering.csv', delimiter=',')[1:5185,-3]
     #filter data in time range 6.00am to 9.00am
     speed = []
     for i in range(0,len(timebuffer)):
@@ -74,17 +74,11 @@ def main():
     
     #X_test  = rescale[-ntest:, :]    # last 1000 samples for testing
     #Y_train = rescale[:-ntest :]
-    '''
-    X_train = dataset[:-1]
-    X_test = X_train
-    Y_train = dataset[1:]
-    Y_test = Y_train
-    '''
+    
     X_train = rescale[:-1]
     X_test = X_train
     Y_train = rescale[1:]
     Y_test = dataset[1:]
-    
     '''
     X_train = rescale[:-1]
     X_test = X_train
@@ -131,7 +125,8 @@ def main():
      
     # do training
     print('Training...')    
-    #train_model.fit(X_train, Y_train, batch_size, nb_epoch, dverbose=1, shuffle=False)
+    train_model.fit(X_train, Y_train, batch_size, nb_epoch, 
+    		    verbose=1, shuffle=False)
     
     
     
@@ -146,15 +141,9 @@ def main():
     
     print('Compiling Theano graph...')
     inference_model.compile(opt, loss='mean_squared_error')
-    inference_model.fit(X_train, Y_train, batch_size, nb_epoch, shuffle=False)
     
     print('Doing inference...')
     h = inference_model.predict(X_test)
-    showtomygod = h
-    with open("show.csv", "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(showtomygod[0:100,:])
-    '''
     for i in range(0,len(dataset)):
         if dataset[i] == round(np.average(dataset)):
             base = dataset[i]
@@ -166,7 +155,7 @@ def main():
     diff_ratio = (h[1]-h[0])/(dataset[2]-dataset[1])
     for i in range(0,len(h)) :
         h[i] = round(((h[i]-float_base_transform)/diff_ratio) + np.average(dataset))
-    '''
+    
     
     
     print(dataset)
@@ -182,14 +171,12 @@ def main():
     with open("houtput.csv", "wb") as f:
         writer = csv.writer(f)
         writer.writerows(h[0:100,:])
-    with open("rescale.csv", "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(rescale[0:100,:])
+
        
     
     #Evaluation part
     #set speed difference threshold
-    #threshold = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\keras_extensions-master\examples\clustering.csv', delimiter=',')[1:,-5]
+    #threshold = genfromtxt('.\\clustering.csv', delimiter=',')[1:,-5]
     threshold = 5
     check_count = 0
     for i in range(0,len(h)):
