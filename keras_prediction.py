@@ -46,7 +46,7 @@ def main():
     for i in range(0,len(timebuffer)):
         if timebuffer[i] == '6:00':
             while timebuffer[i] != '9:05':
-                speed.append(load_data[i])
+                speed.append(load_data[i+1])
                 i+=1
     speed = np.array(speed)
     
@@ -104,7 +104,7 @@ def main():
     print('Creating training model...')
     rbm = GBRBM(hidden_dim, input_dim=input_dim,
     		init=glorot_uniform_sigm,
-    		activation='relu',
+    		activation='sigmoid',
     		nb_gibbs_steps=nb_gibbs_steps,
     		persistent=True,
     		batch_size=batch_size,
@@ -144,17 +144,20 @@ def main():
     
     print('Doing inference...')
     h = inference_model.predict(X_test)
+    
+    
+    #Trasform predicted data into real speed
     for i in range(0,len(dataset)):
-        if dataset[i] == round(np.average(dataset)):
-            base = dataset[i]
-    itemindex = np.where(dataset==base)[0][0]
+        if dataset[i] == round(np.average(dataset)):  #find the average of speed data
+            base = dataset[i] 
+    itemindex = np.where(dataset==base)[0][0] #find the index of that speed
     
-    base_transform = h[itemindex-1]
-    float_base_transform = float(base_transform)
+    base_transform = h[itemindex-1] #find the predicted value from index of average speed 
+    float_base_transform = float(base_transform) #make it as float value
     
-    diff_ratio = (h[1]-h[0])/(dataset[2]-dataset[1])
+    diff_ratio = (h[1]-h[0])/(dataset[2]-dataset[1]) #find the ralation of predicted data and input data
     for i in range(0,len(h)) :
-        h[i] = round(((h[i]-float_base_transform)/diff_ratio) + np.average(dataset))
+        h[i] = round(((h[i]-float_base_transform)/diff_ratio) + np.average(dataset)) #transfrom all predicted value into speed value
     
     
     
