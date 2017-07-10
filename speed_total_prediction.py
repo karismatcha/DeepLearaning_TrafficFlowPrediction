@@ -4,6 +4,7 @@ from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import csv
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
 np.random.seed(1234) # seed random number generator
@@ -18,19 +19,19 @@ from keras_extensions.rbm import GBRBM
 from keras_extensions.layers import SampleBernoulli
 from keras_extensions.initializations import glorot_uniform_sigm
 from numpy import genfromtxt
-import csv
+
 
 
 # configuration
-input_dim = 1
-hidden_dim = 1
+input_dim = 2
+hidden_dim = 2
 batch_size = 10
 nb_epoch = 30
 nb_gibbs_steps = 10
 lr = 0.001  # small learning rate for GB-RBM
 
 @log_to_file('example.log')
-def main():
+def build_model():
     # generate dummy dataset
     def importdict(filename):#creates a function to read the csv
     #create data frame from csv with pandas module
@@ -41,66 +42,61 @@ def main():
     timebuffer = []
     for i in range(1,len(fileDATES)):
         timebuffer.append((fileDATES[i]['systemtime'].split(","))[2]) #append only time into list #A
-    load_data = genfromtxt('.\\clustering.csv', delimiter=',')[1:5185,-3]
+    #load_data = genfromtxt('.\\clustering.csv', delimiter=',')[1:5185,-3]
+    
+    CarsSpeed = genfromtxt('.\\clustering.csv', delimiter=',')[1:5185,-3]
+    CarsTotal = genfromtxt('.\\clustering.csv', delimiter=',')[1:5185,4]
+    
+    
     #filter data in time range 6.00am to 9.00am
+    
+    #get speed since 6.00 am to 9.00 am
     speed = []
     for i in range(0,len(timebuffer)):
         if timebuffer[i] == '6:00':
             while timebuffer[i] != '9:05':
-                speed.append(load_data[i+1])
+                speed.append(CarsSpeed[i])
                 i+=1
     speed = np.array(speed)
     
-    #generate 2d array 
+    #get number of car since 6.00 am to 9.00 am
+    num_car = []
+    for i in range(0,len(timebuffer)):
+        if timebuffer[i] == '6:00':
+            while timebuffer[i] != '9:05':
+                num_car.append(CarsTotal[i])
+                i+=1
+    num_car = np.array(num_car)
+    
+    #combine speed and number of car into dataset 2d array
     dataset = np.array([[]])
-    for i in range(0,len(speed),1):
+    for i in range(0,len(speed)):
         buffer = np.array([])
-        for j in range(0,1):
-            buffer = np.append(buffer,round(speed[i+j]))
+        buffer = np.append(buffer,round(speed[i]))
+        buffer = np.append(buffer,round(num_car[i]))
         buffer2 = np.array([buffer])
         if i == 0:
             dataset = buffer2
         else:
             dataset = np.concatenate((dataset,buffer2))
-    dataset = (np.asarray(dataset, 'float32'))[:-1]
-    #transform datset to 0-1 value
-    rescale = (dataset - np.min(speed)) / (np.max(speed)-np.min(speed))
+    dataset = (np.asarray(dataset, 'float32'))
     
-    #dataset = np.random.normal(loc=np.zeros(input_dim), scale=np.ones(input_dim), size=(nframes, input_dim))
+    rescale = np.array([[]])
+    for i in range(0,dataset.shape[0]):
+        buffer = np.array([])
+        buffer = np.append(buffer,(dataset[i,0] - np.min(speed)) / (np.max(speed)-np.min(speed)))
+        buffer = np.append(buffer,(dataset[i,1] - np.min(num_car)) / (np.max(num_car)-np.min(num_car)))
+        buffer2 = np.array([buffer])
+        if i == 0:
+            rescale = buffer2
+        else:
+            rescale = np.concatenate((rescale,buffer2))
     
-    
-    # split into train and test portion
-    #ntest   = int(0.1*len(speed))
-    #X_train = rescale[:-ntest :]     # all but last 1000 samples for training
-    
-    #X_test  = rescale[-ntest:, :]    # last 1000 samples for testing
-    #Y_train = rescale[:-ntest :]
     
     X_train = rescale[:-1]
     X_test = X_train
     Y_train = rescale[1:]
     Y_test = dataset[1:]
-    '''
-    X_train = rescale[:-1]
-    X_test = X_train
-    Y_train = dataset[1:]
-    Y_test = Y_train
-    '''
-    '''
-    # split into train and test portion
-    ntest   = int(0.1*len(speed))
-    X_train = rescale[:-ntest]
-    X_train = X_train[:-1]
-    Y_train = dataset[:-ntest]
-    Y_train = Y_train[1:]
-    
-    X_test = rescale[-ntest:]
-    X_test = X_test[:-1]
-    Y_test = dataset[-ntest:]
-    Y_test = Y_test[1:]
-    '''
-    
-    #assert X_train.shape[0] >= X_test.shape[0], 'Train set should be at least size of test set!'
     # setup model structure
     print('Creating training model...')
     rbm = GBRBM(hidden_dim, input_dim=input_dim,
@@ -114,7 +110,11 @@ def main():
     rbm.srng = RandomStreams(seed=srng_seed)
     
     train_model = Sequential()
+    
     train_model.add(rbm)
+    #train_model.add(Dense(1, activation='sigmoid'))
+    
+    
     #train_model.summary()
     opt = SGD(lr, 0., decay=0.0, nesterov=False)
     loss=rbm.contrastive_divergence_loss
@@ -137,6 +137,7 @@ def main():
     h_given_x = rbm.get_h_given_x_layer(as_initial_layer=True)
     
     inference_model = Sequential()
+    #inference_model.add(Dense(6, input_dim = 2, activation='relu'))
     inference_model.add(h_given_x)
     #inference_model.add(Dense(8, activation='relu'))
     #inference_model.add(SampleBernoulli(mode='maximum_likelihood'))
@@ -147,25 +148,29 @@ def main():
     print('Doing inference...')
     h = inference_model.predict(X_test)
     
-    
+    speed_result = []
+    for i in range(0,len(h)):
+        speed_result.append(round((h[i,0]*(np.max(speed)-np.min(speed)) + np.min(speed)))) #transfrom all predicted value into speed value
+    speed_result = np.array(speed_result)
+    '''
     #Trasform predicted data into real speed
     for i in range(0,len(dataset)):
-        if dataset[i] == round(np.average(dataset)):  #find the average of speed data
-            base = dataset[i] 
-    itemindex = np.where(dataset==base)[0][0] #find the index of that speed
+        if dataset[i,0] == round(np.average(dataset[:,0])):  #find the average of speed data
+            base = dataset[i,0] 
+    itemindex = np.where(dataset[:,0]==base)[0][0] #find the index of that speed
     
-    base_transform = h[itemindex-1] #find the predicted value from index of average speed 
+    base_transform = h[itemindex-1,0] #find the predicted value from index of average speed 
     float_base_transform = float(base_transform) #make it as float value
     
-    diff_ratio = (h[1]-h[0])/(dataset[2]-dataset[1]) #find the ralation of predicted data and input data
-    for i in range(0,len(h)) :
-        h[i] = round(((h[i]-float_base_transform)/diff_ratio) + np.average(dataset)) #transfrom all predicted value into speed value
-    
-    
+    diff_ratio = abs(h[1,0]-h[0,0])/(dataset[2,0]-dataset[1,0]) #find the ralation of predicted data and input data
+    speed_result = []
+    for i in range(0,len(h)):
+        speed_result.append(round(((h[i,0]-float_base_transform)/diff_ratio) + np.average(dataset[:,0]))) #transfrom all predicted value into speed value
+    speed_result = np.array(speed_result)
     
     print(dataset)
-    
     print(h)
+    print(speed_result)
     
     
     #save to csv
@@ -175,8 +180,8 @@ def main():
         writer.writerows(dataset[0:100,:])
     with open("houtput.csv", "wb") as f:
         writer = csv.writer(f)
-        writer.writerows(h[0:100,:])
-
+        writer.writerows(speed_result[0:100,:])
+    '''
        
     
     #Evaluation part
@@ -184,15 +189,39 @@ def main():
     #threshold = genfromtxt('.\\clustering.csv', delimiter=',')[1:,-5]
     threshold = 5
     check_count = 0
-    for i in range(0,len(h)):
+    for i in range(0,speed_result.shape[0]):
         #check = abs(Y_test[i] - h[i]) > abs(threshold[i])
-        check = abs(Y_test[i] - h[i]) > abs(threshold)
+        check = abs(Y_test[i,0] - speed_result[i]) > abs(threshold)
         if check == True:
             check_count+=1
             #print("error predict: pred {0} truth {1} threshold {2}" .format(h[i],Y_test[i],abs(threshold[i])))
-            print("error predict: pred {0} truth {1} threshold {2}" .format(h[i],Y_test[i],abs(threshold)))
-    accuracy = (float(h.shape[0]-check_count)/h.shape[0])*100
-    print("RBM Accuracy = %.2f %%" % accuracy)
+            #print("error predict: pred {0} truth {1} threshold {2}" .format(speed_result[i],Y_test[i,0],abs(threshold)))
+    accuracy = (float(speed_result.shape[0]-check_count)/speed_result.shape[0])*100
+    print("RBM Prediction Accuracy = %.2f %%" % accuracy)
     
+    
+    #get user input and predict the next speed
+    min_speed = float(np.min(speed))
+    max_speed = float(np.max(speed))
+    def get_input():
+        input_speed = input('Enter speed: ')
+        input_numcar = input('Enter number of car: ')
+        if(input_speed != -1 and input_numcar != -1):
+            input_speed = (input_speed - min_speed) / (max_speed-min_speed)
+            input_numcar = (input_numcar - min_speed) / (max_speed-min_speed)
+            buffer = np.array([[input_speed,input_numcar]])
+            h = inference_model.predict(buffer)
+            
+            result = round(h[0,0]*(max_speed-min_speed) + min_speed)
+            print ('Next Speed is ' + str(result))
+            return 1
+        else:
+            return -1
+    out = 1
+    while(out!=-1):
+        out = get_input()
+        
+
 if __name__ == '__main__':
-    main()
+    build_model()
+    

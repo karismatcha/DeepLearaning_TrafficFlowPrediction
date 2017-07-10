@@ -468,7 +468,7 @@ class GBRBM(RBM):
 
 class GNRRBM(GBRBM):
     def __init__(self, hidden_dim, init='glorot_uniform',
-		activation='sigmoid', weights=None,
+		activation='relu', weights=None,
 		W_regularizer=None, bx_regularizer=None, bh_regularizer=None,
 		activity_regularizer=None,
                 W_constraint=None, bx_constraint=None, bh_constraint=None,
