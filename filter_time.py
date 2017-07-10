@@ -21,17 +21,25 @@ fileDATES = importdict('clustering')
 timebuffer = []
 for i in range(1,len(fileDATES)):
     timebuffer.append((fileDATES[i]['systemtime'].split(","))[2]) #append only time into list #A
-load_data = genfromtxt('.\\clustering.csv', delimiter=',')
 #filter data in time range 6.00am to 9.00am
+with open('.\\clustering.csv', 'rb') as f:
+    reader = csv.reader(f)
+    import_data = []
+    for row in reader:
+        import_data.append(row)
+header = import_data[0]
+
+
 data = []
 for i in range(0,len(timebuffer)):
     if timebuffer[i] == '6:00':
         while timebuffer[i] != '9:05':
-            data.append(load_data[i+1])
+            data.append(import_data[i+1])
             i+=1
-data = np.array(data)
+import_data = np.array(import_data)
+
 with open("new_data.csv", "wb") as f:
         writer = csv.writer(f)
+        writer.writerow(header)
         writer.writerows(data)
 print("Done")
-

@@ -11,6 +11,7 @@ srng_seed = np.random.randint(2**30)
 
 from keras.models import Sequential, Model
 from keras.optimizers import SGD
+from keras.layers import Dense
 
 from keras_extensions.logging import log_to_file
 from keras_extensions.rbm import GBRBM
@@ -114,7 +115,7 @@ def main():
     
     train_model = Sequential()
     train_model.add(rbm)
-    train_model.summary()
+    #train_model.summary()
     opt = SGD(lr, 0., decay=0.0, nesterov=False)
     loss=rbm.contrastive_divergence_loss
     metrics = [rbm.reconstruction_loss]
@@ -137,6 +138,7 @@ def main():
     
     inference_model = Sequential()
     inference_model.add(h_given_x)
+    #inference_model.add(Dense(8, activation='relu'))
     #inference_model.add(SampleBernoulli(mode='maximum_likelihood'))
     
     print('Compiling Theano graph...')
