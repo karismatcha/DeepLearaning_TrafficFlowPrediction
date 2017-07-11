@@ -23,8 +23,8 @@ from numpy import genfromtxt
 
 
 # configuration
-input_dim = 2
-hidden_dim = 2
+input_dim = 3
+hidden_dim = 3
 batch_size = 10
 nb_epoch = 30
 nb_gibbs_steps = 10
@@ -44,8 +44,9 @@ def build_model():
         timebuffer.append((fileDATES[i]['systemtime'].split(","))[2]) #append only time into list #A
     #load_data = genfromtxt('.\\clustering.csv', delimiter=',')[1:5185,-3]
     
-    CarsSpeed = genfromtxt('.\\clustering.csv', delimiter=',')[1:5185,-3]
-    CarsTotal = genfromtxt('.\\clustering.csv', delimiter=',')[1:5185,4]
+    CarsSpeed = genfromtxt('.\\clustering.csv', delimiter=',')[1:,-3]
+    CarsTotal = genfromtxt('.\\clustering.csv', delimiter=',')[1:,4]
+    hol = genfromtxt('.\\clustering.csv', delimiter=',')[1:,-7]
     
     
     #filter data in time range 6.00am to 9.00am
@@ -68,12 +69,23 @@ def build_model():
                 i+=1
     num_car = np.array(num_car)
     
+    #get holiday data since 6.00 am to 9.00 am
+    holiday = []
+    for i in range(0,len(timebuffer)):
+        if timebuffer[i] == '6:00':
+            while timebuffer[i] != '9:05':
+                holiday.append(hol[i])
+                i+=1
+    holiday = np.array(holiday)
+    
     #combine speed and number of car into dataset 2d array
+    #get dataset = [speed,num_car,holiday]
     dataset = np.array([[]])
     for i in range(0,len(speed)):
         buffer = np.array([])
         buffer = np.append(buffer,round(speed[i]))
         buffer = np.append(buffer,round(num_car[i]))
+        buffer = np.append(buffer,round(holiday[i]))
         buffer2 = np.array([buffer])
         if i == 0:
             dataset = buffer2
@@ -86,6 +98,7 @@ def build_model():
         buffer = np.array([])
         buffer = np.append(buffer,(dataset[i,0] - np.min(speed)) / (np.max(speed)-np.min(speed)))
         buffer = np.append(buffer,(dataset[i,1] - np.min(num_car)) / (np.max(num_car)-np.min(num_car)))
+        buffer = np.append(buffer,(dataset[i,2] - np.min(holiday)) / (np.max(holiday)-np.min(holiday)))
         buffer2 = np.array([buffer])
         if i == 0:
             rescale = buffer2
@@ -147,41 +160,14 @@ def build_model():
     
     print('Doing inference...')
     h = inference_model.predict(X_test)
+    print(h)
     
+    #convert result to real speed
     speed_result = []
     for i in range(0,len(h)):
         speed_result.append(round((h[i,0]*(np.max(speed)-np.min(speed)) + np.min(speed)))) #transfrom all predicted value into speed value
     speed_result = np.array(speed_result)
-    '''
-    #Trasform predicted data into real speed
-    for i in range(0,len(dataset)):
-        if dataset[i,0] == round(np.average(dataset[:,0])):  #find the average of speed data
-            base = dataset[i,0] 
-    itemindex = np.where(dataset[:,0]==base)[0][0] #find the index of that speed
-    
-    base_transform = h[itemindex-1,0] #find the predicted value from index of average speed 
-    float_base_transform = float(base_transform) #make it as float value
-    
-    diff_ratio = abs(h[1,0]-h[0,0])/(dataset[2,0]-dataset[1,0]) #find the ralation of predicted data and input data
-    speed_result = []
-    for i in range(0,len(h)):
-        speed_result.append(round(((h[i,0]-float_base_transform)/diff_ratio) + np.average(dataset[:,0]))) #transfrom all predicted value into speed value
-    speed_result = np.array(speed_result)
-    
-    print(dataset)
-    print(h)
     print(speed_result)
-    
-    
-    #save to csv
-    print('Done!')
-    with open("dataset.csv", "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(dataset[0:100,:])
-    with open("houtput.csv", "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(speed_result[0:100,:])
-    '''
        
     
     #Evaluation part
@@ -205,14 +191,18 @@ def build_model():
     max_speed = float(np.max(speed))
     min_numcar = float(np.min(num_car))
     max_numcar = float(np.max(num_car))
+    min_hol = float(np.min(holiday))
+    max_hol =  float(np.max(holiday))
     
     def get_input():
         input_speed = input('Enter speed: ')
         input_numcar = input('Enter number of car: ')
+        input_hol = input('Enter holday(0 = no, 1 = yes): ')
         if(input_speed != -1 and input_numcar != -1):
             input_speed = (input_speed - min_speed) / (max_speed-min_speed)
             input_numcar = (input_numcar - min_numcar) / (max_numcar-min_numcar)
-            buffer = np.array([[input_speed,input_numcar]])
+            input_hol = (input_hol - min_hol) / (max_hol-min_hol)
+            buffer = np.array([[input_speed,input_numcar,input_hol]])
             h = inference_model.predict(buffer)
             
             result = round(h[0,0]*(max_speed-min_speed) + min_speed)
@@ -223,7 +213,7 @@ def build_model():
     out = 1
     while(out!=-1):
         out = get_input()
-        
+     
 
 if __name__ == '__main__':
     build_model()
