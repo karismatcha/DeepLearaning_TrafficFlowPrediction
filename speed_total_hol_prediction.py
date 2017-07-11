@@ -198,7 +198,7 @@ def build_model():
         input_speed = input('Enter speed: ')
         input_numcar = input('Enter number of car: ')
         input_hol = input('Enter holday(0 = no, 1 = yes): ')
-        if(input_speed != -1 and input_numcar != -1):
+        if(input_speed != -1 and input_numcar != -1 and input_hol!=-1):
             input_speed = (input_speed - min_speed) / (max_speed-min_speed)
             input_numcar = (input_numcar - min_numcar) / (max_numcar-min_numcar)
             input_hol = (input_hol - min_hol) / (max_hol-min_hol)
@@ -212,6 +212,7 @@ def build_model():
             return -1
     out = 1
     while(out!=-1):
+        print("Enter speed = -1 , number of car = -1 and holiday = -1 to exit")
         out = get_input()
      
 
