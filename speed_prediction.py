@@ -167,8 +167,7 @@ def main():
     
     print(h)
     
-    
-    #save to csv
+
     print('Done!')
     with open("dataset.csv", "wb") as f:
         writer = csv.writer(f)
