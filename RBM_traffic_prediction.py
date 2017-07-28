@@ -55,7 +55,7 @@ def build_model():
     
     #use all speed
     speed = np.array(CarsSpeed)
-    
+     
     
     '''
     #filter data in time range 6.00am to 9.00am
@@ -90,7 +90,6 @@ def build_model():
     holiday = np.array(holiday)
 
     '''
-    
     #combine speed and number of car into dataset 2d array
     #get dataset = [100] -> [[100]]
     dataset = np.array([[]])
@@ -105,28 +104,43 @@ def build_model():
         else:
             dataset = np.concatenate((dataset,buffer2))
     dataset = (np.asarray(dataset, 'float32'))
+
+    #rescale from real speed to 0-1 value and keep in "buffer" variable
+    #one day has 288 data
+    buffer = np.array([])
+    for i in range(0,len(speed),288):
+        buffer_speed = []
+        #start in one day
+        for j in range(i,i+288):
+            buffer_speed.append(speed[j])
+        buffer_speed = np.array(buffer_speed)
+        #get mean and std in one day
+        mean_day = np.mean(buffer_speed)
+        std_day = np.std(buffer_speed)
+        #resacle by equation: z = (x - mean(x))/std(x)
+        for k in range(i,i+288):
+            regular = (speed[k] - mean_day) / (std_day)
+            buffer = np.append(buffer,[regular])
     
     
-    #change all value from real value to 0-1
-    #use equation z = (x-avg(x))/sd(x)
+    #change data from 1d array to 2d array
+    #get [0.03] -> [[0.03]]
     rescale = np.array([[]])
-    for i in range(0,dataset.shape[0]):
-        buffer = np.array([])
-        buffer = np.append(buffer,(dataset[i,0] - np.mean(speed)) / (np.std(speed)))
-        #buffer = np.append(buffer,(dataset[i,1] - np.mean(num_car)) / (np.std(num_car)))
-        #buffer = np.append(buffer,(dataset[i,2] - np.mean(holiday)) / (np.std(holiday)))
-        buffer2 = np.array([buffer])
+    for i in range(0,len(speed)):
+        buffer2 = np.array([])
+        buffer2 = np.append(buffer2,(buffer[i]))
+        buffer2 = np.array([buffer2])
         if i == 0:
             rescale = buffer2
         else:
             rescale = np.concatenate((rescale,buffer2))
-    
+
     #divide training data and testing data
     train_ratio = 0.75
     divider = int(round(train_ratio*rescale.shape[0]))
     
     #set future minutes for predicting
-    pred_minutes = 60
+    pred_minutes = 5
     
     #divide data into train and test
     X_train = rescale[:divider-int(pred_minutes/5)]
@@ -182,7 +196,7 @@ def build_model():
     #get 0-1 values
     print('Doing inference...')
     h = inference_model.predict(X_test)
-    print(h)
+    #print(h)
     
     #convert result to real speed
     #use invert of the same equation
@@ -191,7 +205,7 @@ def build_model():
     for i in range(0,len(h)):
         speed_result.append(round((h[i,0]*(np.std(speed)) + np.mean(speed)))) #transfrom all predicted value into speed value
     speed_result = np.array(speed_result)
-    print(speed_result)
+    #print(speed_result)
     
     
     
