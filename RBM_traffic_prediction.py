@@ -131,7 +131,7 @@ def build_model():
     #divide data into train and test
     X_train = rescale[:divider-int(pred_minutes/5)]
     X_test = rescale[divider:-int(pred_minutes/5)]
-    Y_train = rescale[int(pred_minutes/5):divider]
+    Y_train = dataset[int(pred_minutes/5):divider]
     Y_test = dataset[divider+int(pred_minutes/5):]
      
     

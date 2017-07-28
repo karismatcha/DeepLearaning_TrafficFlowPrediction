@@ -1,83 +1,83 @@
 Creating training model...
 Compiling Theano graph...
 Training...
-C:\Anaconda2\lib\site-packages\keras\backend\theano_backend.py:489: UserWarning: theano.function was asked to create a function computing outputs given certain inputs, but the provided input variable at index 0 is not part of the computational graph needed to compute the outputs: gbrbm_input_1.
+C:\Anaconda2\lib\site-packages\keras\backend\theano_backend.py:489: UserWarning: theano.function was asked to create a function computing outputs given certain inputs, but the provided input variable at index 0 is not part of the computational graph needed to compute the outputs: gbrbm_input_3.
 To make this warning into an error, you can pass the parameter on_unused_input='raise' to theano.function. To disable it completely, use on_unused_input='ignore'.
   **kwargs)
 Epoch 1/30
-3876/3876 [==============================] - 4s - loss: 0.5470 - reconstruction_loss: 0.3420     
+3876/3876 [==============================] - 4s - loss: 119.3012 - reconstruction_loss: 3.6230     
 Epoch 2/30
-3876/3876 [==============================] - 4s - loss: 0.5468 - reconstruction_loss: 0.3372     
+3876/3876 [==============================] - 4s - loss: 39.0573 - reconstruction_loss: 2.4174     
 Epoch 3/30
-3876/3876 [==============================] - 5s - loss: 0.5468 - reconstruction_loss: 0.3343     
+3876/3876 [==============================] - 4s - loss: 22.2151 - reconstruction_loss: 1.5838     
 Epoch 4/30
-3876/3876 [==============================] - 5s - loss: 0.5467 - reconstruction_loss: 0.3328     
+3876/3876 [==============================] - 4s - loss: 18.7029 - reconstruction_loss: 1.1257     
 Epoch 5/30
-3876/3876 [==============================] - 4s - loss: 0.5467 - reconstruction_loss: 0.3315     
+3876/3876 [==============================] - 4s - loss: 17.9831 - reconstruction_loss: 0.9285     
 Epoch 6/30
-3876/3876 [==============================] - 5s - loss: 0.5466 - reconstruction_loss: 0.3315     
+3876/3876 [==============================] - 4s - loss: 17.8414 - reconstruction_loss: 0.8477     
 Epoch 7/30
-3876/3876 [==============================] - 4s - loss: 0.5465 - reconstruction_loss: 0.3306     
+3876/3876 [==============================] - 4s - loss: 17.8162 - reconstruction_loss: 0.8128     
 Epoch 8/30
-3876/3876 [==============================] - 4s - loss: 0.5465 - reconstruction_loss: 0.3303     
+3876/3876 [==============================] - 4s - loss: 17.8130 - reconstruction_loss: 0.7974     
 Epoch 9/30
-3876/3876 [==============================] - 4s - loss: 0.5464 - reconstruction_loss: 0.3306     
+3876/3876 [==============================] - 4s - loss: 17.8133 - reconstruction_loss: 0.7902     
 Epoch 10/30
-3876/3876 [==============================] - 4s - loss: 0.5462 - reconstruction_loss: 0.3318     
+3876/3876 [==============================] - 4s - loss: 17.8138 - reconstruction_loss: 0.7869     
 Epoch 11/30
-3876/3876 [==============================] - 4s - loss: 0.5461 - reconstruction_loss: 0.3304     
+3876/3876 [==============================] - 4s - loss: 17.8141 - reconstruction_loss: 0.7854     
 Epoch 12/30
-3876/3876 [==============================] - 4s - loss: 0.5459 - reconstruction_loss: 0.3310     
+3876/3876 [==============================] - 4s - loss: 17.8141 - reconstruction_loss: 0.7847     
 Epoch 13/30
-3876/3876 [==============================] - 4s - loss: 0.5456 - reconstruction_loss: 0.3319     
+3876/3876 [==============================] - 4s - loss: 17.8141 - reconstruction_loss: 0.7844     
 Epoch 14/30
-3876/3876 [==============================] - 4s - loss: 0.5454 - reconstruction_loss: 0.3335     
+3876/3876 [==============================] - 4s - loss: 17.8141 - reconstruction_loss: 0.7842     
 Epoch 15/30
-3876/3876 [==============================] - 5s - loss: 0.5451 - reconstruction_loss: 0.3339     
+3876/3876 [==============================] - 4s - loss: 17.8140 - reconstruction_loss: 0.7842     
 Epoch 16/30
-3876/3876 [==============================] - 5s - loss: 0.5447 - reconstruction_loss: 0.3329     
+3876/3876 [==============================] - 4s - loss: 17.8140 - reconstruction_loss: 0.7841     
 Epoch 17/30
-3876/3876 [==============================] - 4s - loss: 0.5442 - reconstruction_loss: 0.3331     
+3876/3876 [==============================] - 4s - loss: 17.8139 - reconstruction_loss: 0.7841     
 Epoch 18/30
-3876/3876 [==============================] - 4s - loss: 0.5437 - reconstruction_loss: 0.3337     
+3876/3876 [==============================] - 4s - loss: 17.8138 - reconstruction_loss: 0.7841     
 Epoch 19/30
-3876/3876 [==============================] - 5s - loss: 0.5431 - reconstruction_loss: 0.3361     
+3876/3876 [==============================] - 4s - loss: 17.8137 - reconstruction_loss: 0.7841     
 Epoch 20/30
-3876/3876 [==============================] - 4s - loss: 0.5424 - reconstruction_loss: 0.3358     
+3876/3876 [==============================] - 4s - loss: 17.8136 - reconstruction_loss: 0.7841     
 Epoch 21/30
-3876/3876 [==============================] - 4s - loss: 0.5415 - reconstruction_loss: 0.3384     
+3876/3876 [==============================] - 4s - loss: 17.8135 - reconstruction_loss: 0.7841     
 Epoch 22/30
-3876/3876 [==============================] - 4s - loss: 0.5405 - reconstruction_loss: 0.3377     
+3876/3876 [==============================] - 4s - loss: 17.8134 - reconstruction_loss: 0.7841     
 Epoch 23/30
-3876/3876 [==============================] - 4s - loss: 0.5392 - reconstruction_loss: 0.3370     
+3876/3876 [==============================] - 4s - loss: 17.8134 - reconstruction_loss: 0.7841     
 Epoch 24/30
-3876/3876 [==============================] - 5s - loss: 0.5378 - reconstruction_loss: 0.3386     
+3876/3876 [==============================] - 4s - loss: 17.8133 - reconstruction_loss: 0.7841     
 Epoch 25/30
-3876/3876 [==============================] - 5s - loss: 0.5361 - reconstruction_loss: 0.3436     
+3876/3876 [==============================] - 4s - loss: 17.8132 - reconstruction_loss: 0.7841     
 Epoch 26/30
-3876/3876 [==============================] - 5s - loss: 0.5342 - reconstruction_loss: 0.3458     
+3876/3876 [==============================] - 4s - loss: 17.8131 - reconstruction_loss: 0.7841     
 Epoch 27/30
-3876/3876 [==============================] - 5s - loss: 0.5319 - reconstruction_loss: 0.3449     
+3876/3876 [==============================] - 4s - loss: 17.8130 - reconstruction_loss: 0.7841     
 Epoch 28/30
-3876/3876 [==============================] - 5s - loss: 0.5291 - reconstruction_loss: 0.3492     
+3876/3876 [==============================] - 4s - loss: 17.8129 - reconstruction_loss: 0.7841     
 Epoch 29/30
-3876/3876 [==============================] - 5s - loss: 0.5261 - reconstruction_loss: 0.3472     
+3876/3876 [==============================] - 4s - loss: 17.8128 - reconstruction_loss: 0.7841     
 Epoch 30/30
-3876/3876 [==============================] - 5s - loss: 0.5226 - reconstruction_loss: 0.3495     
+3876/3876 [==============================] - 4s - loss: 17.8127 - reconstruction_loss: 0.7841     
 Creating inference model...
 Compiling Theano graph...
 Doing inference...
-[[ 0.50979269]
- [ 0.51814681]
- [ 0.52649075]
+[[ 0.17485049]
+ [ 0.07047012]
+ [ 0.02640753]
  ..., 
- [ 0.53108323]
- [ 0.53810751]
- [ 0.53860027]]
-[ 23.  23.  23. ...,  23.  23.  23.]
-RBM Prediction Accuracy = 69.47 %
+ [ 0.01516019]
+ [ 0.00642239]
+ [ 0.006045  ]]
+[ 21.  20.  20. ...,  20.  20.  20.]
+RBM Prediction Accuracy = 69.00 %
 Done!
 MSE
-5.85039723604
+6.07307327
 MAE
-4.31622610118
+4.38085665417
