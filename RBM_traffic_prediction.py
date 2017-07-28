@@ -39,7 +39,7 @@ def build_model():
         df=pd.read_csv(filename+'.csv', names=['systemtime', 'Var1', 'var2'],sep=';',parse_dates=[0]) #or:, infer_datetime_format=True)
         fileDATES=df.T.to_dict().values()#export the data frame to a python dictionary
         return fileDATES #return the dictionary to work with it outside the function
-    fileDATES = importdict('C:\Users\user\Desktop\DeepLearaning_TrafficFlowPrediction\clustering2')
+    fileDATES = importdict('.\\clustering')
     #get time and keep it in list
     #use time to filter data later
     timebuffer = []
@@ -48,7 +48,7 @@ def build_model():
     
     
     #load any features
-    CarsSpeed = genfromtxt('C:\Users\user\Desktop\DeepLearaning_TrafficFlowPrediction\clustering2.csv', delimiter=',')[1:,-3]
+    CarsSpeed = genfromtxt('.\\clustering.csv', delimiter=',')[1:,-3]
     #CarsTotal = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\clustering2.csv', delimiter=',')[1:,4]
     #hol = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\clustering2.csv', delimiter=',')[1:,-7]
     
