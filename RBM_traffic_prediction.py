@@ -39,7 +39,7 @@ def build_model():
         df=pd.read_csv(filename+'.csv', names=['systemtime', 'Var1', 'var2'],sep=';',parse_dates=[0]) #or:, infer_datetime_format=True)
         fileDATES=df.T.to_dict().values()#export the data frame to a python dictionary
         return fileDATES #return the dictionary to work with it outside the function
-    fileDATES = importdict('.\\clustering')
+    fileDATES = importdict('.\\clustering2')
     #get time and keep it in list
     #use time to filter data later
     timebuffer = []
@@ -48,7 +48,7 @@ def build_model():
     
     
     #load any features
-    CarsSpeed = genfromtxt('.\\clustering.csv', delimiter=',')[1:,-3]
+    CarsSpeed = genfromtxt('.\\clustering2.csv', delimiter=',')[1:,-3]
     #CarsTotal = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\clustering2.csv', delimiter=',')[1:,4]
     #hol = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\clustering2.csv', delimiter=',')[1:,-7]
     
@@ -108,7 +108,7 @@ def build_model():
     #rescale from real speed to 0-1 value and keep in "buffer" variable
     #one day has 288 data
     buffer = np.array([])
-    for i in range(0,len(speed),288):
+    for i in range(0,len(speed)-287,287):
         buffer_speed = []
         #start in one day
         for j in range(i,i+288):
@@ -121,8 +121,9 @@ def build_model():
         for k in range(i,i+288):
             regular = (speed[k] - mean_day) / (std_day)
             buffer = np.append(buffer,[regular])
+    rescale = buffer
     
-    
+    '''
     #change data from 1d array to 2d array
     #get [0.03] -> [[0.03]]
     rescale = np.array([[]])
@@ -134,7 +135,7 @@ def build_model():
             rescale = buffer2
         else:
             rescale = np.concatenate((rescale,buffer2))
-
+    '''
     #divide training data and testing data
     train_ratio = 0.75
     divider = int(round(train_ratio*rescale.shape[0]))
