@@ -21,13 +21,11 @@ from keras_extensions.initializations import glorot_uniform_sigm
 from numpy import genfromtxt
 import math
 
-
-
 # configuration
 input_dim = 1
 hidden_dim = 1
 batch_size = 10
-nb_epoch = 30
+nb_epoch = 100
 nb_gibbs_steps = 10
 lr = 0.001  # small learning rate for GB-RBM
 
@@ -46,9 +44,9 @@ def build_model():
     for i in range(1,len(fileDATES)):
         timebuffer.append((fileDATES[i]['systemtime'].split(","))[2]) #append only time into list #A
     
-    
+    timebuffer = timebuffer[0:7499]
     #load any features
-    CarsSpeed = genfromtxt('.\\clustering2.csv', delimiter=',')[1:,-3]
+    CarsSpeed = genfromtxt('.\\clustering2.csv', delimiter=',')[1:7500,-3]
     #CarsTotal = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\clustering2.csv', delimiter=',')[1:,4]
     #hol = genfromtxt('C:\Users\oob13\Desktop\Internship\TrafficFlowPrediction\clustering2.csv', delimiter=',')[1:,-7]
     
